@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>GWA Calculator</title>
+    <meta name="color-scheme" content="light">
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2048%2048%22%3E%3Crect%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2211%22%20fill%3D%22%230f9d73%22/%3E%3Crect%20x%3D%2211%22%20y%3D%2218%22%20width%3D%2226%22%20height%3D%2227%22%20rx%3D%224%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2214.500%22%20y%3D%2222.500%22%20width%3D%2219%22%20height%3D%226%22%20rx%3D%221.500%22%20fill%3D%22%230b4f42%22/%3E%3Ctext%20x%3D%2232.500%22%20y%3D%2227.300%22%20text-anchor%3D%22end%22%20font-size%3D%225.200%22%20font-weight%3D%22700%22%20font-family%3D%22Arial%2Csans-serif%22%20fill%3D%22%23b8f5df%22%3E4.00%3C/text%3E%3Ccircle%20cx%3D%2218%22%20cy%3D%2233.2%22%20r%3D%221.700%22%20fill%3D%22%230f9d73%22/%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2233.2%22%20r%3D%221.700%22%20fill%3D%22%230f9d73%22/%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2233.2%22%20r%3D%221.700%22%20fill%3D%22%230f9d73%22/%3E%3Ccircle%20cx%3D%2218%22%20cy%3D%2237.6%22%20r%3D%221.700%22%20fill%3D%22%230f9d73%22/%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2237.6%22%20r%3D%221.700%22%20fill%3D%22%230f9d73%22/%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2237.6%22%20r%3D%221.700%22%20fill%3D%22%230f9d73%22/%3E%3Ccircle%20cx%3D%2218%22%20cy%3D%2241.8%22%20r%3D%221.700%22%20fill%3D%22%230f9d73%22/%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2241.8%22%20r%3D%221.700%22%20fill%3D%22%230f9d73%22/%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2241.8%22%20r%3D%221.700%22%20fill%3D%22%23f5b942%22/%3E%3Cpath%20d%3D%22M15%2012.500v4.500c0%201.500%204.200%202.800%209%202.800s9-1.300%209-2.800v-4.500L24%2016z%22%20fill%3D%22%2316302a%22/%3E%3Cpath%20d%3D%22M24%202%2041%209%2024%2016%207%209z%22%20fill%3D%22%231d3b34%22%20stroke%3D%22%230b2822%22%20stroke-width%3D%22.6%22%20stroke-linejoin%3D%22round%22/%3E%3Cpath%20d%3D%22M38.500%2010.500V17%22%20stroke%3D%22%23f5b942%22%20stroke-width%3D%221.600%22%20stroke-linecap%3D%22round%22/%3E%3Ccircle%20cx%3D%2238.500%22%20cy%3D%2218.800%22%20r%3D%221.900%22%20fill%3D%22%23f5b942%22/%3E%3C/svg%3E">
+    <meta name="description"
+        content="Compute your General Weighted Average on the 4.00 scale. Scan a grade sheet, save and edit history.">
+    <meta name="theme-color" content="#0f9d73">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <symbol id="lg" viewBox="0 0 48 48">
+                <rect x="11" y="18" width="26" height="27" rx="4" fill="#fff" />
+                <rect x="14.500" y="22.500" width="19" height="6" rx="1.500" fill="#0b4f42" /><text x="32.500"
+                    y="27.300" text-anchor="end" font-size="5.200" font-weight="700" font-family="Arial,sans-serif"
+                    fill="#b8f5df">4.00</text>
+                <circle cx="18" cy="33.2" r="1.700" fill="#0f9d73" />
+                <circle cx="24" cy="33.2" r="1.700" fill="#0f9d73" />
+                <circle cx="30" cy="33.2" r="1.700" fill="#0f9d73" />
+                <circle cx="18" cy="37.6" r="1.700" fill="#0f9d73" />
+                <circle cx="24" cy="37.6" r="1.700" fill="#0f9d73" />
+                <circle cx="30" cy="37.6" r="1.700" fill="#0f9d73" />
+                <circle cx="18" cy="41.8" r="1.700" fill="#0f9d73" />
+                <circle cx="24" cy="41.8" r="1.700" fill="#0f9d73" />
+                <circle cx="30" cy="41.8" r="1.700" fill="#f5b942" />
+                <path d="M15 12.500v4.500c0 1.500 4.200 2.800 9 2.800s9-1.300 9-2.800v-4.500L24 16z" fill="#16302a" />
+                <path d="M24 2 41 9 24 16 7 9z" fill="#1d3b34" stroke="#0b2822" stroke-width=".6"
+                    stroke-linejoin="round" />
+                <path d="M38.500 10.500V17" stroke="#f5b942" stroke-width="1.600" stroke-linecap="round" />
+                <circle cx="38.500" cy="18.800" r="1.900" fill="#f5b942" />
+            </symbol>
+        </defs>
+    </svg>
+    <main>
+        <header>
+            <div class="brand"><span class="logo"><svg class="lg" aria-hidden="true">
+                        <use href="#lg" />
+                    </svg></span>
+                <div>
+                    <h1>GWA Calculator</h1>
+                    <p class="mu sub">General Weighted Average · <span id="subsc">4.00-0.00 scale</span></p>
+                </div>
+            </div>
+        </header>
+
+        <section class="card hero">
+            <div class="gl" id="gl">Your GWA</div><b id="gwa" class="big">–</b>
+            <div class="stats">
+                <div><b id="tu">0</b><span>Total units</span></div>
+                <div><b id="wp">0</b><span>Weighted points</span></div>
+            </div>
+            <div class="scsel np"><label for="sc">Grading scale</label><select id="sc">
+                    <option value="4">4.00-0.00</option>
+                    <option value="5">1.00-5.00</option>
+                </select></div>
+            <div class="bar np"><button id="hist"><i data-ic="mark"></i>Save to history</button><button id="csv"><i
+                        data-ic="dl"></i>CSV</button><button id="prt"><i data-ic="print"></i>Print</button></div>
+        </section>
+
+        <div class="col">
+            <section class="card np o1">
+                <h2><i data-ic="plus"></i>Add subjects</h2>
+                <div class="row mu"><span>Units</span><span>Grade</span><span></span></div>
+                <div id="draft"></div>
+                <div class="bar ab"><button id="add"><i data-ic="plus"></i>Add row</button><button class="ok"
+                        id="save"><i data-ic="check"></i>Save completed rows</button></div>
+                <div class="msg" id="m1"></div>
+            </section>
+
+            <section class="card o3" id="sv">
+                <h2><i data-ic="bmk"></i>Saved subjects</h2>
+                <div class="eb np hid" id="eb">
+                    <div><b>Editing history record</b><br><span class="mu" id="ebd"></span></div>
+                    <div class="bar"><button class="ok" id="eupd"><i data-ic="check"></i>Update record</button><button
+                            id="ecan"><i data-ic="x"></i>Cancel</button></div>
+                </div>
+                <div class="wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Units</th>
+                                <th>Final Grade</th>
+                                <th>Pts</th>
+                                <th class="np"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="list"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+        <div class="col">
+            <section class="card np o2">
+                <h2><i data-ic="cam"></i>Scan grades</h2>
+                <div class="bar" style="margin-top:0;margin-bottom:8px"><button type="button" id="sample"><i
+                            data-ic="eye"></i>See a sample grade sheet</button></div>
+                <input type="file" id="img2" accept="image/*" hidden>
+                <div class="pw"><img id="pv" class="hid" alt="Preview"
+                        style="max-width:100%;max-height:200px;margin-top:10px;border-radius:10px"><button type="button"
+                        id="px" aria-label="Remove image" title="Remove image">&times;</button></div>
+                <div class="msg mu" id="m2">Upload an image of your grade sheet. Subjects are added automatically;
+                    anything unclear is flagged for you to fix.</div>
+                <template id="tpl-sample">
+                    <div class="sample">
+                        <svg viewBox="0 0 320 200" role="img"
+                            aria-label="Sample grade sheet with the Units and Final Grade columns highlighted">
+                            <rect x="4" y="4" width="312" height="192" rx="8" fill="#fff" stroke="#cfd8d3" />
+                            <text x="16" y="22" font-size="10" font-weight="700" fill="#10211b">STUDENT GRADE
+                                REPORT</text>
+                            <text x="16" y="34" font-size="7.5" fill="#62786f">1st Semester, A.Y. 2026–2027
+                                (sample)</text>
+                            <rect x="12" y="44" width="296" height="16" rx="3" fill="#e6f2ec" />
+                            <g font-size="7.5" font-weight="700" fill="#10211b"><text x="18" y="55">Code</text><text
+                                    x="70" y="55">Subject</text><text x="205" y="55">Units</text><text x="245"
+                                    y="55">Final Grade</text></g>
+                            <g font-size="7.5" fill="#10211b">
+                                <text x="18" y="74">CS 101</text><text x="70" y="74">Intro to Computing</text><text
+                                    x="212" y="74">3</text><text x="256" y="74">3.50</text>
+                                <text x="18" y="92">MATH 101</text><text x="70" y="92">College Algebra</text><text
+                                    x="212" y="92">3</text><text x="256" y="92">3.25</text>
+                                <text x="18" y="110">ENG 101</text><text x="70" y="110">Communication Skills</text><text
+                                    x="212" y="110">3</text><text x="256" y="110">3.75</text>
+                                <text x="18" y="128">PE 101</text><text x="70" y="128">Physical Fitness</text><text
+                                    x="212" y="128">2</text><text x="256" y="128">4.00</text>
+                                <text x="18" y="146">ORI 101</text><text x="70" y="146">Orientation</text><text x="212"
+                                    y="146">1</text><text x="256" y="146">3.00</text>
+                            </g>
+                            <g stroke="#d9eae3">
+                                <line x1="12" y1="79" x2="308" y2="79" />
+                                <line x1="12" y1="97" x2="308" y2="97" />
+                                <line x1="12" y1="115" x2="308" y2="115" />
+                                <line x1="12" y1="133" x2="308" y2="133" />
+                                <line x1="12" y1="151" x2="308" y2="151" />
+                            </g>
+                            <rect x="198" y="41" width="110" height="112" rx="5" fill="none" stroke="#0f9d73"
+                                stroke-width="1.5" stroke-dasharray="4 3" />
+                            <text x="253" y="168" font-size="7.5" font-weight="700" fill="#0f9d73"
+                                text-anchor="middle">The app reads these two columns</text>
+                            <text x="160" y="186" font-size="7" fill="#62786f" text-anchor="middle">Sample only. These
+                                are not real grades.</text>
+                        </svg>
+                        <ul>
+                            <li>Keep the whole table in view, including the <b>Units</b> and <b>Final Grade</b> columns.
+                            </li>
+                            <li>Lay the sheet flat in good light, and avoid glare and shadows.</li>
+                            <li>Shoot straight on, not at an angle, and keep the text sharp.</li>
+                            <li>Use a JPG or PNG photo.</li>
+                            <li>The sheet must have columns headed <b>Units</b> and <b>Final Grade</b>, like the sample.
+                                Other images are rejected and nothing is added.</li>
+                        </ul>
+                    </div>
+                </template>
+                <div id="ocr"></div>
+                <div class="bar sb hid" id="ocrb"><button class="ok" id="imp"><i data-ic="dl"></i>Import fixed
+                        rows</button><button id="oadd"><i data-ic="plus"></i>Add row</button><button id="clr"><i
+                            data-ic="x"></i>Discard</button></div>
+                <div class="bar sb"><button class="p" id="up"><i data-ic="upload"></i>Upload image</button><button
+                        id="crp" class="hid"><i data-ic="crop"></i>Crop &amp; rescan</button></div>
+            </section>
+
+            <section class="card np o4">
+                <h2><i data-ic="clock"></i>History</h2>
+                <div id="hl" class="mu">No records yet.</div>
+                <div class="bar sb"><button class="d" id="hc"><i data-ic="trash"></i>Clear history</button><button
+                        class="dz" id="ra"><i data-ic="trash"></i>Reset all data</button></div>
+            </section>
+        </div>
+
+        <section class="card about np" style="grid-column:1/-1;order:5">
+            <h2><i data-ic="bk"></i>How to use</h2><button type="button" class="hb" data-info="how"><span
+                    class="hd">Step-by-step guide to adding, scanning, cropping, editing and saving. Tap to
+                    read.</span><i data-ic="next"></i></button><template id="tpl-how">
+                <div class="about" style="content-visibility:visible">
+                    <ol class="steps">
+                        <li><b>Choose a grading scale.</b> Pick <i>4.00-0.00</i> or <i>1.00-5.00</i> from the dropdown
+                            under your GWA. Switching asks first and clears your current subjects. History records keep
+                            the scale they were saved with.</li>
+                        <li><b>Add subjects manually.</b> Under <i>Add subjects</i>, choose the <i>Units</i> (3, 2 or 1)
+                            and the <i>Grade</i>. Tap <i>Add row</i> for more, then <i>Save completed rows</i>. Your GWA
+                            updates at the top.</li>
+                        <li><b>Check the sample.</b> Tap <i>See a sample grade sheet</i> at the top of <i>Scan
+                                grades</i> to see the layout the app reads: a table with <i>Units</i> and <i>Final
+                                Grade</i> columns.</li>
+                        <li><b>Upload your grade sheet.</b> Tap <i>Upload image</i> at the bottom of <i>Scan grades</i>
+                            and choose a JPG or PNG (up to 15 MB). On a phone, the picker can also take a new photo.
+                        </li>
+                        <li><b>Crop the image.</b> Drag the box and its corners over the table, then tap <i>Scan
+                                cropped</i> (or <i>Use full image</i>).</li>
+                        <li><b>Read the result pop-up.</b> A loading pop-up checks that the image matches the sample.
+                            Green means subjects were added. Red explains the problem, lists a bulleted
+                            <i>Recommendation</i> and may offer <i>See sample</i>, <i>Crop image</i> and <i>Try
+                                again</i>.</li>
+                        <li><b>Fix and refine.</b> Fix highlighted rows, then tap <i>Import fixed rows</i>. A
+                            <i>verify</i> tag means the reader was unsure: tap <i>Crop &amp; rescan</i>. Tap the
+                            <i>&times;</i> on the preview to remove the image. A new image, or a re-crop, refreshes the
+                            subjects from your previous scan; rows you added or edited yourself are kept.</li>
+                        <li><b>Edit or delete subjects.</b> In <i>Saved subjects</i>, use the pencil to change units or
+                            final grade, or the trash icon to delete (you'll be asked to confirm).</li>
+                        <li><b>Save to history.</b> Tap <i>Save to history</i> to keep the GWA and its subjects. The
+                            screen then clears for your next sheet. Tap a record in <i>History</i> to see its details.
+                        </li>
+                        <li><b>Edit a history record.</b> Tap the pencil on a record, or <i>Edit in Saved subjects</i>
+                            in its details. Its subjects load under an orange banner. Tap <i>Update record</i> to save
+                            changes or <i>Cancel</i> to discard them. Your previous list returns afterwards.</li>
+                        <li><b>Export, print or start over.</b> <i>CSV</i> and <i>Print</i> need at least one saved
+                            subject, otherwise a pop-up tells you what to do. <i>Clear history</i> and <i>Reset all
+                                data</i> ask first.</li>
+                    </ol>
+                </div>
+            </template>
+        </section>
+
+        <section class="card about np" style="grid-column:1/-1;order:6">
+            <h2><i data-ic="inf"></i>About GWA Calculator</h2><button type="button" class="hb" data-info="about"><span
+                    class="hd">What the app does, the GWA formula and the grade scale. Tap to read.</span><i
+                    data-ic="next"></i></button><template id="tpl-about">
+                <div class="about" style="content-visibility:visible">
+                    <p>GWA Calculator is a simple tool for computing your General Weighted Average on the 4.00-0.00 or
+                        1.00-5.00 grading scale. Enter the units and grade for each subject and your GWA updates
+                        instantly, so you can track your standing each term or plan the grades you need.</p>
+                    <div class="formula">GWA = Σ (units × grade) ÷ Σ units</div>
+                    <p style="margin-bottom:0">4.00-0.00 scale grades:</p>
+                    <div class="scale">
+                        <span>4.00</span><span>3.75</span><span>3.50</span><span>3.25</span><span>3.00</span><span>2.75</span><span>2.50</span><span>2.25</span><span>2.00</span><span>1.75</span><span>1.50</span><span>1.25</span><span>1.00</span><span>0.00</span>
+                    </div>
+                    <p style="margin:10px 0 0">1.00-5.00 scale grades:</p>
+                    <div class="scale">
+                        <span>1.00</span><span>1.25</span><span>1.50</span><span>1.75</span><span>2.00</span><span>2.25</span><span>2.50</span><span>2.75</span><span>3.00</span><span>5.00</span>
+                    </div>
+                    <ul>
+                        <li>Choose the grading scale from the dropdown under your GWA.</li>
+                        <li>Add subjects manually with dropdowns for units (3 to 1) and grades, or scan a photo of your
+                            grade sheet to fill them in automatically. Crop the photo first for a more accurate read.
+                        </li>
+                        <li>Every error appears as a pop-up with a recommendation, and scans are verified against the
+                            sample sheet in a loading pop-up.</li>
+                        <li>Edit or delete saved subjects at any time.</li>
+                        <li>Save results to history, edit a record later, export CSV, or print.</li>
+                        <li>Your data is stored only on this device, in your browser.</li>
+                    </ul>
+                </div>
+            </template>
+        </section>
+        <section class="card np" style="grid-column:1/-1;order:6">
+            <h2><i data-ic="code"></i>Technologies used</h2>
+            <div class="tkg">
+                <div class="tk"><span class="lg"><svg viewBox="0 0 36 36" role="img" aria-hidden="true">
+                            <path d="M4 2h28l-2.5 27L18 34 6.5 29z" fill="#e44d26" />
+                            <path d="M18 31.4l9.3-2.6L29.4 5H18z" fill="#f16529" /><text x="18" y="24"
+                                text-anchor="middle" font-size="17" font-weight="800"
+                                font-family="Arial,Helvetica,sans-serif" fill="#fff">5</text>
+                        </svg></span>
+                    <div><b>HTML5</b><small>Page layout, forms and pop-up templates</small></div>
+                </div>
+                <div class="tk"><span class="lg"><svg viewBox="0 0 36 36" role="img" aria-hidden="true">
+                            <path d="M4 2h28l-2.5 27L18 34 6.5 29z" fill="#1572b6" />
+                            <path d="M18 31.4l9.3-2.6L29.4 5H18z" fill="#33a9dc" /><text x="18" y="24"
+                                text-anchor="middle" font-size="17" font-weight="800"
+                                font-family="Arial,Helvetica,sans-serif" fill="#fff">3</text>
+                        </svg></span>
+                    <div><b>CSS3</b><small>Responsive layout, themes and print styles</small></div>
+                </div>
+                <div class="tk"><span class="lg"><svg viewBox="0 0 36 36" role="img" aria-hidden="true">
+                            <rect x="2" y="2" width="32" height="32" rx="2" fill="#f7df1e" /><text x="33" y="32"
+                                text-anchor="end" font-size="13" font-weight="800"
+                                font-family="Arial,Helvetica,sans-serif" fill="#000">JS</text>
+                        </svg></span>
+                    <div><b>JavaScript</b><small>GWA calculation, history and editing logic</small></div>
+                </div>
+                <div class="tk"><span class="lg"><svg viewBox="0 0 36 36" role="img" aria-hidden="true">
+                            <rect x="2" y="2" width="32" height="32" rx="7" fill="#1e3a5f" />
+                            <path d="M8 13V8h5M23 8h5v5M28 23v5h-5M13 28H8v-5" fill="none" stroke="#7dd3fc"
+                                stroke-width="2" stroke-linecap="round" /><text x="18" y="23" text-anchor="middle"
+                                font-size="11" font-weight="800" font-family="Arial,Helvetica,sans-serif"
+                                fill="#fff">Aa</text>
+                        </svg></span>
+                    <div><b>Tesseract.js</b><small>Reads Units and Final Grade from your photo</small></div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="card np">
+            <h2><i data-ic="usr"></i>Developers</h2>
+            <div class="dev">
+                <div class="av" aria-hidden="true">EJ</div>
+                <div><b>El Jay</b><span class="mu">Developer</span></div>
+            </div>
+            <p class="copy mu">© 2026 GWA Calculator</p>
+        </footer>
+    </main>
+    <div id="mo" class="mo hid np" role="dialog" aria-modal="true" aria-labelledby="mt">
+        <div class="mb">
+            <div class="mh"><span class="mic" id="mi"></span>
+                <h3 id="mt"></h3>
+            </div>
+            <div id="mc"></div>
+            <div class="ma" id="ma"></div>
+        </div>
+    </div>
+    <div id="toast" class="np" role="status" aria-live="polite"></div>
+    <script src="index.js"></script>
+</body>
+</html>
