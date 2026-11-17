@@ -1,3 +1,5 @@
+addEventListener("error", e => { try { const t = document.getElementById("toast"); if (t) { t.textContent = "Script error: " + (e.message || "unknown") + " (line " + e.lineno + ")"; t.className = "np s er" } } catch (x) { } }); // shows any script error on screen
+console.info("GWA Calculator build 8");
 const $ = id => document.getElementById(id);
 const r2 = x => (Math.floor(x * 100 + 0.5 + 1e-9) / 100).toFixed(2); // round half up, 2 decimals
 const IC = {
@@ -20,21 +22,26 @@ const ic = n => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path st
 // Grading scales: 4.00-0.00 and 1.00-5.00
 const SCALES = { "4": ["4.00", "3.75", "3.50", "3.25", "3.00", "2.75", "2.50", "2.25", "2.00", "1.75", "1.50", "1.25", "1.00", "0.00"], "5": ["1.00", "1.25", "1.50", "1.75", "2.00", "2.25", "2.50", "2.75", "3.00", "5.00"] };
 const SCL = { "4": "4.00-0.00", "5": "1.00-5.00" };
-let scale = "4", G = SCALES["4"];
-function setScale(s) { scale = SCALES[s] ? s : "4"; G = SCALES[scale]; const e = $("sc"); if (e) e.value = scale; const b = $("subsc"); if (b) b.textContent = SCL[scale] + " scale" }
+let scale = "4", G = SCALES["4"], GN = G.map(Number), GMAX = Math.max(...GN); // GN/GMAX are cached so scanning doesn't rebuild them per word
+function setScale(s) { scale = SCALES[s] ? s : "4"; G = SCALES[scale]; GN = G.map(Number); GMAX = Math.max(...GN); const e = $("sc"); if (e) e.value = scale; const b = $("subsc"); if (b) b.textContent = SCL[scale] + " scale" }
 function applyScale() { draft = draft.map(r => !r.g || G.includes(r.g) ? r : { ...r, g: "" }); ocr = ocr.map(r => !r.g || G.includes(r.g) ? r : { ...r, g: "" }); rDraft(); rOcr() }
 function restoreEdit() { saved = editing.backup; if (editing.bsc) setScale(editing.bsc); editing = null; applyScale() }
-const near = n => G.map(Number).reduce((a, b) => Math.abs(b - n) < Math.abs(a - n) ? b : a);
+const near = n => GN.reduce((a, b) => Math.abs(b - n) < Math.abs(a - n) ? b : a);
 let saved = [], draft = [{ n: "", u: "", g: "" }], ocr = [], hist = [], editing = null;
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const setH = (el, h) => { if (el._h !== h) { el.innerHTML = h; el._h = h } }; // skip DOM writes when nothing changed
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const noEx = a => a.map(s => { if (!s || !s.ex) return s; const { ex, ...r } = s; return r }); // data saved by older versions: every subject now counts
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem("gwa") || "{}"); setScale(d.scale);
-    saved = (Array.isArray(d.saved) ? d.saved : []).filter(s => s && isFinite(+s.u) && +s.u > 0 && isFinite(+s.g));
-    hist = (Array.isArray(d.hist) ? d.hist : []).filter(h => h && isFinite(+h.g) && isFinite(+h.u)).map(h => ({ ...h, sc: SCALES[h.sc] ? h.sc : "4", id: h.id || uid(), d: String(h.d || ""), s: +h.s || 0 }));
-    const e = d.editing; if (e && Array.isArray(e.backup)) { if (hist.some(h => h.id === e.id)) editing = { id: e.id, backup: e.backup }; else { saved = e.backup; if (e.bsc) setScale(e.bsc) } }
+    saved = noEx((Array.isArray(d.saved) ? d.saved : []).filter(s => s && isFinite(+s.u) && +s.u > 0 && isFinite(+s.g)));
+    hist = (Array.isArray(d.hist) ? d.hist : []).filter(h => h && isFinite(+h.g) && isFinite(+h.u)).map(h => {
+      const o = { ...h, sc: SCALES[h.sc] ? h.sc : "4", id: h.id || uid(), d: String(h.d || ""), s: +h.s || 0 };
+      if (Array.isArray(h.r) && h.r.some(s => s && s.ex)) { const r = noEx(h.r); let u = 0, w = 0; for (const s of r) { u += +s.u; w += s.u * s.g } Object.assign(o, { r, u: +u.toFixed(2), s: r.length, ...(u ? { g: +r2(w / u) } : {}) }) }
+      return o
+    });
+    const e = d.editing; if (e && Array.isArray(e.backup)) { if (hist.some(h => h.id === e.id)) editing = { id: e.id, backup: noEx(e.backup), bsc: e.bsc }; else { saved = noEx(e.backup); if (e.bsc) setScale(e.bsc) } }
   } catch (e) { saved = []; hist = []; editing = null }
 }
 let st, lastJ = ""; function store() { clearTimeout(st); st = setTimeout(flush, 250) }
@@ -51,8 +58,8 @@ function rDraft(bad) { $("draft").innerHTML = rowsHTML(draft, bad) }
 function rOcr() { $("ocr").innerHTML = rowsHTML(ocr); $("ocrb").classList.toggle("hid", !ocr.length) }
 const valid = r => uOk(r.u) && G.includes(r.g);
 const need = r => { const p = []; if (!uOk(r.u)) p.push("units"); if (!G.includes(r.g)) p.push("grade"); return p };
-function calc() { const u = saved.reduce((a, s) => a + +s.u, 0), w = saved.reduce((a, s) => a + s.u * s.g, 0); return { u, w, g: u ? w / u : null } }
-function rAll() {
+function calc() { let u = 0, w = 0; for (const s of saved) { u += +s.u; w += s.u * s.g } return { u, w, g: u ? w / u : null } }
+function renderAll() {
   const c = calc(); $("gwa").textContent = c.g === null ? "–" : r2(c.g); $("tu").textContent = +c.u.toFixed(2); $("wp").textContent = r2(c.w);
   setH($("list"), saved.length ? saved.map((s, i) => `<tr><td>${i + 1}</td><td>${s.u}</td><td>${(+s.g).toFixed(2)}${s.c ? '<span class="chk" title="Read from your photo. Please verify.">verify</span>' : ''}</td><td>${+(s.u * s.g).toFixed(2)}</td><td class="np"><button class="ib ed" data-e="${i}" aria-label="Edit">${ic("edit")}</button> <button class="d ib" data-x="${i}" aria-label="Delete">${ic("trash")}</button></td></tr>`).join("") : '<tr><td colspan="5" class="mu">No saved subjects.</td></tr>');
   setH($("hl"), hist.length ? hist.map((h, i) => { const cur = editing && editing.id === h.id; return `<div class="hi${cur ? " cur" : ""}"><button class="hb" data-v="${i}" aria-label="View details"><span><b>${r2(h.g)}</b><small>${h.u} units · ${h.s} subjects · ${SCL[h.sc || "4"]}</small>${cur ? '<span class="tg">editing</span>' : h.e ? '<span class="tg">edited</span>' : ""}<br><span class="hd">${esc(h.e || h.d)}</span></span>${ic("next")}</button><button class="ib ed" data-ed="${i}" aria-label="Edit record">${ic("edit")}</button><button class="d ib" data-h="${i}" aria-label="Delete record">${ic("trash")}</button></div>` }).join("") : "No records yet.");
@@ -60,6 +67,7 @@ function rAll() {
   if (editing) { const h = hist.find(x => x.id === editing.id); $("ebd").textContent = (h ? h.d : "") + " · changes apply only when you tap Update record" }
   store()
 }
+let rq = 0; function rAll() { rq || (rq = requestAnimationFrame(() => { rq = 0; renderAll() })) } // batch re-renders into one frame
 function msg(id, t, c) { $(id).textContent = t; $(id).className = "msg " + (c || "") }
 let tt; function toast(t, c) { const e = $("toast"); e.textContent = t; e.className = "np s " + (c || ""); clearTimeout(tt); tt = setTimeout(() => e.classList.remove("s"), 2200) }
 $("sc").onchange = async e => {
@@ -108,7 +116,7 @@ function modal(o) {
 }
 function ask(o) {
   return new Promise(res => modal({
-    title: o.title, icon: "warn", tone: "er", body: `<p style="margin:0;color:var(--mu)">${o.text}</p>`,
+    title: o.title, icon: o.mic || "warn", tone: o.tone === undefined ? "er" : o.tone, body: `<p style="margin:0;color:var(--mu)">${o.text}</p>`,
     buttons: [{ label: "Cancel", fn: () => res(false) }, { label: o.ok, cls: o.cls || "dz", icon: o.icon || "trash", fn: () => res(true) }], onDismiss: () => res(false)
   }))
 }
@@ -212,14 +220,50 @@ $("hc").onclick = async () => {
   if (await ask({ title: "Clear all history?", text: "Every history record will be removed. Your saved subjects stay.", ok: "Clear history" })) { if (editing) { restoreEdit() } hist = []; rAll(); toast("History cleared") }
 };
 $("ra").onclick = async () => { if (await ask({ title: "Reset all data?", text: "All saved subjects and history will be deleted. This can't be undone.", ok: "Reset all" })) { saved = []; hist = []; editing = null; rAll(); toast("All data reset") } };
+const csvCell = v => { v = String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v };
+function buildCsv(summary, f) { // f = true writes spreadsheet formulas, false writes computed values
+  const n = saved.length, rg = c => `${c}2:${c}${n + 1}`, L = [["#", "Subject", "Units", "Final Grade", "Weighted points"]];
+  saved.forEach((s, i) => { const k = i + 2; L.push([i + 1, s.n || "", +s.u, (+s.g).toFixed(2), f ? `=C${k}*D${k}` : +(s.u * s.g).toFixed(2)]) });
+  if (summary) {
+    const c = calc(), gs = saved.map(s => +s.g), hi = scale === "4", best = hi ? Math.max(...gs) : Math.min(...gs), worst = hi ? Math.min(...gs) : Math.max(...gs), r0 = n + 4, at = k => "B" + (r0 + k); // best = highest grade on 4.00-0.00, lowest on 1.00-5.00
+    L.push([], ["Summary"],
+      ["Total subjects", f ? `=COUNT(${rg("C")})` : n],
+      ["Total units", f ? `=SUM(${rg("C")})` : c.u],
+      ["Total weighted points", f ? `=SUM(${rg("E")})` : +c.w.toFixed(2)],
+      ["GWA", f ? `=IFERROR(ROUND(${at(2)}/${at(1)},2),0)` : r2(c.g)],
+      ["Best grade", f ? `=${hi ? "MAX" : "MIN"}(${rg("D")})` : best.toFixed(2)],
+      ["Lowest-ranked grade", f ? `=${hi ? "MIN" : "MAX"}(${rg("D")})` : worst.toFixed(2)],
+      ["Simple average grade", f ? `=ROUND(AVERAGE(${rg("D")}),2)` : r2(gs.reduce((a, b) => a + b, 0) / gs.length)],
+      ["Grading scale", SCL[scale]], ["Generated", new Date().toLocaleString()])
+  }
+  return "\uFEFF" + L.map(r => r.map(csvCell).join(",")).join("\r\n")
+}
+async function exportCsv(name, summary, f) {
+  const txt = buildCsv(summary, f), fn = cleanName(name, "gwa-report", "csv");
+  try { const d = window.claude && await claude.use("downloads"); if (d) { await d.save({ filename: fn, data: txt }); toast("CSV exported", "ok"); return } } catch (e) { }
+  saveBlob(new Blob([txt], { type: "text/csv;charset=utf-8" }), fn); toast("CSV exported", "ok")
+}
+function openCsv(v) { // v restores the choices when the confirmation is cancelled
+  v = v || { n: "gwa-report-" + new Date().toISOString().slice(0, 10), s: true, f: true };
+  modal({
+    title: "Export CSV", icon: "dl", body: `<div class="fld"><label for="cn">File name</label><input id="cn" type="text" maxlength="80" value="${esc(v.n)}" autocomplete="off"></div>
+<div class="mu" id="cnn" style="margin:-2px 0 6px;font-size:.82rem"></div>
+<label class="chkl"><input type="checkbox" id="cs" ${v.s ? "checked" : ""}> Include summary computations (units, GWA, best, lowest, average)</label>
+<label class="chkl"><input type="checkbox" id="cf" ${v.f ? "checked" : ""}> Use spreadsheet formulas (Excel, Google Sheets)</label>
+<p class="mu" style="margin:8px 0 0">Turn formulas off to export plain computed values. You will be asked to confirm before the file downloads.</p>`,
+    onOpen: () => { const u = () => { $("cnn").textContent = "Saves as: " + cleanName($("cn").value, "gwa-report", "csv") }; $("cn").oninput = u; u() },
+    buttons: [{ label: "Cancel", fn: () => { } }, {
+      label: "Download CSV", cls: "ok", icon: "dl", fn: () => {
+        const n = $("cn").value, s = $("cs").checked, f = $("cf").checked, fn = cleanName(n, "gwa-report", "csv");
+        ask({ title: "Download this CSV file?", text: `File: <b>${esc(fn)}</b><br>${s ? "Includes summary computations" : "No summary computations"} · ${f ? "spreadsheet formulas" : "plain computed values"} · ${saved.length} subject(s).`, ok: "Download", icon: "dl", cls: "ok", mic: "dl", tone: "" }).then(y => y ? exportCsv(n, s, f) : openCsv({ n, s, f }));
+        return false
+      }
+    }]
+  })
+}
 $("csv").onclick = () => {
-  if (!saved.length) return errBox({ title: "Nothing to export", text: "There are no saved subjects to put in a CSV file.", tip: "Add and save at least one subject, then tap CSV again." }); const c = calc();
-  const rows = [["#", "Units", "Grade", "Weighted points"], ...saved.map((s, i) => [i + 1, s.u, (+s.g).toFixed(2), s.u * s.g]), [], ["Total units", c.u], ["Weighted points", c.w], ["GWA", r2(c.g)]];
-  const txt = rows.map(r => r.join(",")).join("\n");
-  (async () => {
-    try { const d = window.claude && await claude.use("downloads"); if (d) { await d.save({ filename: "gwa.csv", data: txt }); return } } catch (e) { }
-    const u = URL.createObjectURL(new Blob([txt], { type: "text/csv" })), a = document.createElement("a"); a.href = u; a.download = "gwa.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(u), 2000)
-  })(); toast("CSV exported", "ok")
+  if (!saved.length) return errBox({ title: "Nothing to export", text: "There are no saved subjects to put in a CSV file.", tip: "Add and save at least one subject, then tap CSV again." });
+  openCsv()
 };
 $("prt").onclick = () => {
   if (!saved.length) return errBox({ title: "Nothing to print", text: "There are no saved subjects to print.", tip: ["Add and save at least one subject.", "Then tap Print again."] });
@@ -252,13 +296,16 @@ async function viaClaude(bmp) {
   const out = arr.map(r => ({ n: String(r.n || ""), u: String(+r.u || ""), g: (+r.g).toFixed(2) })).filter(r => r.g !== "NaN");
   out.hdr = Array.isArray(v) ? true : !!(v && v.hasUnitsColumn && v.hasFinalGradeColumn); return out
 }
-async function prep(b) { const k = Math.min(3, 3000 / Math.max(b.width, b.height)); const c = document.createElement("canvas"); c.width = Math.round(b.width * k); c.height = Math.round(b.height * k); const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(b, 0, 0, c.width, c.height); const d = x.getImageData(0, 0, c.width, c.height), p = d.data; for (let i = 0; i < p.length; i += 4) { let v = p[i] * .3 + p[i + 1] * .59 + p[i + 2] * .11; v = Math.max(0, Math.min(255, (v - 128) * 1.5 + 128)); p[i] = p[i + 1] = p[i + 2] = v } x.putImageData(d, 0, 0); return c }
+async function prep(b) {
+  const k = Math.min(3, 3000 / Math.max(b.width, b.height)), c = document.createElement("canvas"); c.width = Math.round(b.width * k); c.height = Math.round(b.height * k); const x = c.getContext("2d", { willReadFrequently: true }); x.imageSmoothingQuality = "high"; x.drawImage(b, 0, 0, c.width, c.height); const d = x.getImageData(0, 0, c.width, c.height), p = d.data, L = new Uint8ClampedArray(256); for (let i = 0; i < 256; i++)L[i] = (i - 128) * 1.5 + 128; // lookup table: grayscale + contrast without per-pixel float math
+  for (let i = 0; i < p.length; i += 4)p[i] = p[i + 1] = p[i + 2] = L[(p[i] * 77 + p[i + 1] * 151 + p[i + 2] * 28) >> 8]; x.putImageData(d, 0, 0); return c
+}
 function snap(t) {
   t = t.replace(/^[^\w]+|[^\w]+$/g, "").replace(/[,:;]/g, ".");
   if (/^\d{3}$/.test(t)) { const n = +t / 100; return G.includes(n.toFixed(2)) ? { g: n.toFixed(2), w: false } : null }
   t = t.replace(/[Ss]/g, "5").replace(/[Oo]/g, "0").replace(/[Il|]/g, "1").replace(/B/g, "8");
   if (!/^\d\.\d{1,2}$/.test(t)) return null;
-  const n = +t; if (n > Math.max(...G.map(Number))) return null; const q = near(n);
+  const n = +t; if (n > GMAX) return null; const q = near(n);
   return { g: q.toFixed(2), w: Math.abs(q - n) > .001 }
 }
 function parseWords(ws) {
@@ -271,7 +318,7 @@ function parseWords(ws) {
     const c = us.filter(u => u.x < g.x && !used.has(u) && Math.abs(u.y - g.y) < Math.max(g.h, u.h) * 1.2).sort((a, b) => b.x - a.x)[0]; // nearest column to the left of the grade = Units, not the # column
     if (c) used.add(c); out.push({ n: "", u: c ? c.t : "", g: g.g, w: g.w || !c })
   });
-  const f = out.filter(r => r.u).map(r => r.u), m = f.sort((a, b) => f.filter(v => v === b).length - f.filter(v => v === a).length)[0] || "3";
+  const cnt = {}; out.forEach(r => { if (r.u) cnt[r.u] = (cnt[r.u] || 0) + 1 }); const m = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0] || "3"; // most common units value
   out.forEach(r => { if (!r.u) r.u = m });
   return out
 }
@@ -281,14 +328,15 @@ const getW = () => tw || (tw = Tesseract.createWorker("eng"));
 function killW() { clearTimeout(twT); const p = tw; tw = null; if (p) p.then(w => w.terminate()).catch(() => { }) }
 async function viaTess(b) {
   await loadT(); const c = await prep(b); let best = [], all = "";
-  try { const w = await getW(); for (const m of ["6", "11"]) { await w.setParameters({ tessedit_pageseg_mode: m }); const r = await w.recognize(c); all += " " + (r.data.text || ""); let rows = r.data.words ? parseWords(r.data.words) : []; if (!rows.length) rows = parse(r.data.text); if (rows.length > best.length) best = rows } }
+  try { const w = await getW(); for (const m of ["6", "11"]) { await w.setParameters({ tessedit_pageseg_mode: m }); const r = await w.recognize(c); all += " " + (r.data.text || ""); let rows = r.data.words ? parseWords(r.data.words) : []; if (!rows.length) rows = parse(r.data.text); if (rows.length > best.length) best = rows; if (hasHdr(all) && best.length && best.every(r => !r.w)) break } } // a clean first pass skips the second OCR pass
   catch (e) { killW(); throw e } finally { c.width = c.height = 0; clearTimeout(twT); twT = setTimeout(killW, 90000) }
   best.hdr = hasHdr(all); return best
 }
-let busy = false, pvu = null, scanTok = 0, lastSrc = "up", lastFile = null, lastBatch = 0;
+let busy = false, pvu = null, scanTok = 0, lastSrc = "up", lastFile = null, lastBatch = 0, pvFile = null, pvUrl = null;
 const HINT = "Upload an image of your grade sheet. Subjects are added automatically; anything unclear is flagged for you to fix.";
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rj) => setTimeout(() => rj(new Error("timeout")), ms))]);
-function resetScan() { lastFile = null; lastBatch = 0; ocr = []; rOcr(); const v = $("pv"); v.classList.add("hid"); v.removeAttribute("src"); if (pvu) { URL.revokeObjectURL(pvu); pvu = null } $("crp").classList.add("hid"); msg("m2", HINT, "mu") }
+const showPv = on => ["prv"].forEach(i => { const e = $(i); if (e) e.classList.toggle("hid", !on) }); // Preview buttons follow the uploaded image
+function resetScan() { lastFile = null; lastBatch = 0; ocr = []; rOcr(); const v = $("pv"); v.classList.add("hid"); v.removeAttribute("src"); if (pvu) { URL.revokeObjectURL(pvu); pvu = null } $("crp").classList.add("hid"); pvFile = null; showPv(false); msg("m2", HINT, "mu") }
 function setBusy(b) { busy = b;["up", "crp"].forEach(i => { $(i).disabled = b }) }
 const SE = {
   noFile: ["No image selected", "No image was selected.", "Tap Upload image and choose a photo of your grade sheet."],
@@ -324,7 +372,7 @@ async function scan(file, src, rep) {
   if (file.size > 15 * 1024 * 1024) return scanErr("big");
   setBusy(true); const my = ++scanTok, dead = () => my !== scanTok; let bmp = null;
   try {
-    try { if (pvu) URL.revokeObjectURL(pvu); pvu = URL.createObjectURL(file); $("pv").src = pvu; $("pv").classList.remove("hid") } catch (e) { }
+    try { if (pvu) URL.revokeObjectURL(pvu); pvu = URL.createObjectURL(file); $("pv").src = pvu; $("pv").classList.remove("hid"); pvFile = file; showPv(true) } catch (e) { }
     showVerify();
     try { bmp = await createImageBitmap(file) } catch (e) { return dead() ? 0 : scanErr("open") }
     if (dead()) return;
@@ -352,7 +400,7 @@ function pick(file, src) {
   lastFile = file; $("crp").classList.remove("hid"); openCrop(file, src)
 }
 function openCrop(file, src, rep) {
-  if (!file || busy) return; const url = URL.createObjectURL(file); let R, drag = null, im, cb;
+  if (!file || busy) return; const url = URL.createObjectURL(file); let R, drag = null, im, cb, fr = 0;
   const draw = () => Object.assign(cb.style, { left: R.x + "px", top: R.y + "px", width: R.w + "px", height: R.h + "px" });
   modal({
     title: "Crop your grade sheet", icon: "crop",
@@ -377,14 +425,47 @@ function openCrop(file, src, rep) {
           if (m.includes("w")) { x = Math.min(Math.max(0, o.x + dx), o.x + o.w - M); w = o.x + o.w - x } else w = Math.min(Math.max(M, o.w + dx), W - o.x);
           if (m.includes("n")) { y = Math.min(Math.max(0, o.y + dy), o.y + o.h - M); h = o.y + o.h - y } else h = Math.min(Math.max(M, o.h + dy), H - o.y)
         }
-        R = { x, y, w, h }; draw()
+        R = { x, y, w, h }; fr || (fr = requestAnimationFrame(() => { fr = 0; draw() }))
       };
       cb.onpointerup = cb.onpointercancel = () => { drag = null }
     }
   })
 }
 $("crp").onclick = () => openCrop(lastFile, lastSrc, true);
-$("px").onclick = () => { resetScan(); toast("Image removed") };
+$("px").onclick = async () => { if (await ask({ title: "Remove this image?", text: "The preview and the loaded image will be removed. Subjects already added from the scan stay in Saved subjects.", ok: "Remove", icon: "x" })) { resetScan(); toast("Image removed") } };
+["pv", "prv"].forEach(i => { const e = $(i); if (e) e.onclick = () => openPreview() });
+// ---------- Files: names, downloads ----------
+function cleanName(v, def, ext) { const n = String(v || "").trim().replace(/\.(png|jpe?g|csv)$/i, "").replace(/[\\/:*?"<>|\u0000-\u001f]+/g, "-").replace(/\s+/g, " ").trim().slice(0, 80); return (n || def) + "." + ext }
+function saveBlob(blob, name) { const u = URL.createObjectURL(blob), a = document.createElement("a"); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000) }
+function openPreview() {
+  if (!pvFile) return; if (pvUrl) URL.revokeObjectURL(pvUrl);
+  const full = lastFile || pvFile, crop = lastFile && pvFile !== lastFile ? pvFile : null, base = (full.name || "grade-sheet").replace(/\.[^.]+$/, "");
+  let cur = crop || full, url = pvUrl = URL.createObjectURL(cur), edited = false; const done = () => { URL.revokeObjectURL(url); pvUrl = null }; // opens on the image that was scanned
+  modal({
+    title: "Preview image", icon: "eye", body: `<div class="pvbox"><img src="${url}" alt="Uploaded grade sheet" id="pvi" decoding="async"></div><div class="mu" id="pvm" style="margin:6px 0 10px"></div>
+<div class="fld"><label for="dv">Image</label><select id="dv"><option value="full"${crop ? "" : " selected"}>Full image</option><option value="crop"${crop ? " selected" : " disabled"}>Cropped image${crop ? "" : " (not available)"}</option></select></div>
+<div class="fld"><label for="dn">File name</label><input id="dn" type="text" maxlength="80" value="${esc(base + (crop ? "-cropped-image" : ""))}" autocomplete="off"></div>
+<div class="fld"><label for="df">Format</label><select id="df"><option value="png">PNG</option><option value="jpeg">JPEG</option></select></div><div class="mu" id="dnn" style="font-size:.82rem"></div>`,
+    onOpen: () => {
+      const i = $("pvi"); i.onload = () => { $("pvm").textContent = `${i.naturalWidth} × ${i.naturalHeight} px · ${Math.round(cur.size / 1024)} KB` };
+      const sv = () => { $("dnn").textContent = "Saves as: " + cleanName($("dn").value, "grade-sheet", $("df").value === "jpeg" ? "jpg" : "png") };
+      $("dn").oninput = () => { edited = true; sv() }; $("df").onchange = sv; sv();
+      $("dv").onchange = e => { const c = e.target.value === "crop" && crop; cur = c ? crop : full; URL.revokeObjectURL(url); url = pvUrl = URL.createObjectURL(cur); i.src = url; if (!edited) $("dn").value = base + (c ? "-cropped-image" : ""); sv() }
+    },
+    onDismiss: done, buttons: [{ label: "Close", fn: done }, { label: "Download", cls: "ok", icon: "dl", fn: () => { downloadImage(cur, $("dn").value, $("df").value); return false } }]
+  })
+}
+async function downloadImage(file, name, fmt) {
+  const want = fmt === "jpeg" ? "image/jpeg" : "image/png";
+  if (file.type === want) { saveBlob(file, cleanName(name, "grade-sheet", fmt === "jpeg" ? "jpg" : "png")); toast("Image downloaded", "ok"); return } // already in that format: skip the decode and re-encode
+  try {
+    const bmp = await createImageBitmap(file), cv = document.createElement("canvas"); cv.width = bmp.width; cv.height = bmp.height; const x = cv.getContext("2d"), jp = fmt === "jpeg";
+    if (jp) { x.fillStyle = "#fff"; x.fillRect(0, 0, cv.width, cv.height) } x.drawImage(bmp, 0, 0); bmp.close && bmp.close();
+    const blob = await new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(), jp ? "image/jpeg" : "image/png", .92)); cv.width = cv.height = 0;
+    saveBlob(blob, cleanName(name, "grade-sheet", jp ? "jpg" : "png")); toast("Image downloaded", "ok")
+  }
+  catch (e) { errBox({ title: "Download failed", text: "The image couldn't be converted or saved.", tip: ["Try the other format.", "Check that your browser allows downloads."], onClose: () => openPreview() }) }
+}
 // ---------- Info pop-ups ----------
 const INFO = { how: ["How to use", "bk"], about: ["About GWA Calculator", "inf"] };
 document.querySelectorAll("[data-info]").forEach(b => b.onclick = () => { const k = b.dataset.info; modal({ title: INFO[k][0], icon: INFO[k][1], body: $("tpl-" + k).innerHTML, buttons: [{ label: "Close", cls: "ok", fn: () => { } }] }) });
@@ -400,7 +481,7 @@ $("imp").onclick = () => {
   if (left) errBox({ title: `${left} row(s) still need fixing`, text: "Some scanned rows are still incomplete.", tip: "Set Units (1-3) and a Grade for each highlighted row, then tap Import fixed rows again." })
 };
 $("oadd").onclick = () => { ocr.push({ n: "", u: "", g: "" }); rOcr() };
-$("clr").onclick = async () => { if (ocr.length && !await ask({ title: "Discard scanned rows?", text: "The rows that could not be imported will be removed.", ok: "Discard" })) return; ocr = []; rOcr(); $("pv").classList.add("hid"); msg("m2", HINT, "mu") };
+$("clr").onclick = async () => { if (ocr.length && !await ask({ title: "Discard scanned rows?", text: "The rows that could not be imported will be removed.", ok: "Discard" })) return; ocr = []; rOcr(); $("pv").classList.add("hid"); showPv(false); msg("m2", HINT, "mu") };
 bind($("draft"), () => draft, rDraft);
 bind($("ocr"), () => ocr, rOcr);
 document.querySelectorAll("[data-ic]").forEach(el => { el.innerHTML = ic(el.dataset.ic) });

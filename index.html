@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <title>GWA Calculator</title>
@@ -11,8 +12,9 @@
     <meta name="theme-color" content="#0f9d73">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=8">
 </head>
+
 <body>
     <svg width="0" height="0" style="position:absolute" aria-hidden="true">
         <defs>
@@ -103,9 +105,9 @@
                 <div class="bar" style="margin-top:0;margin-bottom:8px"><button type="button" id="sample"><i
                             data-ic="eye"></i>See a sample grade sheet</button></div>
                 <input type="file" id="img2" accept="image/*" hidden>
-                <div class="pw"><img id="pv" class="hid" alt="Preview"
-                        style="max-width:100%;max-height:200px;margin-top:10px;border-radius:10px"><button type="button"
-                        id="px" aria-label="Remove image" title="Remove image">&times;</button></div>
+                <div class="pw"><img id="pv" class="hid" decoding="async" aria-label="Uploaded grade sheet"
+                        alt="Preview" style="max-width:100%;max-height:200px;margin-top:10px;border-radius:10px"><button
+                        type="button" id="px" aria-label="Remove image" title="Remove image">&times;</button></div>
                 <div class="msg mu" id="m2">Upload an image of your grade sheet. Subjects are added automatically;
                     anything unclear is flagged for you to fix.</div>
                 <template id="tpl-sample">
@@ -128,7 +130,7 @@
                                     x="212" y="92">3</text><text x="256" y="92">3.25</text>
                                 <text x="18" y="110">ENG 101</text><text x="70" y="110">Communication Skills</text><text
                                     x="212" y="110">3</text><text x="256" y="110">3.75</text>
-                                <text x="18" y="128">PE 101</text><text x="70" y="128">Physical Fitness</text><text
+                                <text x="18" y="128">SCI 101</text><text x="70" y="128">Natural Science</text><text
                                     x="212" y="128">2</text><text x="256" y="128">4.00</text>
                                 <text x="18" y="146">ORI 101</text><text x="70" y="146">Orientation</text><text x="212"
                                     y="146">1</text><text x="256" y="146">3.00</text>
@@ -163,7 +165,7 @@
                         rows</button><button id="oadd"><i data-ic="plus"></i>Add row</button><button id="clr"><i
                             data-ic="x"></i>Discard</button></div>
                 <div class="bar sb"><button class="p" id="up"><i data-ic="upload"></i>Upload image</button><button
-                        id="crp" class="hid"><i data-ic="crop"></i>Crop &amp; rescan</button></div>
+                        id="crp" class="hid"><i data-ic="crop"></i>Crop &amp; rescan</button><button id="prv" class="hid"><i data-ic="eye"></i>Preview</button></div>
             </section>
 
             <section class="card np o4">
@@ -184,35 +186,31 @@
                             under your GWA. Switching asks first and clears your current subjects. History records keep
                             the scale they were saved with.</li>
                         <li><b>Add subjects manually.</b> Under <i>Add subjects</i>, choose the <i>Units</i> (3, 2 or 1)
-                            and the <i>Grade</i>. Tap <i>Add row</i> for more, then <i>Save completed rows</i>. Your GWA
-                            updates at the top.</li>
+                            and the <i>Grade</i>. Tap <i>Add row</i> for more, then <i>Save completed rows</i>.</li>
                         <li><b>Check the sample.</b> Tap <i>See a sample grade sheet</i> at the top of <i>Scan
                                 grades</i> to see the layout the app reads: a table with <i>Units</i> and <i>Final
                                 Grade</i> columns.</li>
                         <li><b>Upload your grade sheet.</b> Tap <i>Upload image</i> at the bottom of <i>Scan grades</i>
-                            and choose a JPG or PNG (up to 15 MB). On a phone, the picker can also take a new photo.
-                        </li>
+                            and choose a JPG or PNG (up to 15 MB).</li>
                         <li><b>Crop the image.</b> Drag the box and its corners over the table, then tap <i>Scan
                                 cropped</i> (or <i>Use full image</i>).</li>
                         <li><b>Read the result pop-up.</b> A loading pop-up checks that the image matches the sample.
-                            Green means subjects were added. Red explains the problem, lists a bulleted
-                            <i>Recommendation</i> and may offer <i>See sample</i>, <i>Crop image</i> and <i>Try
-                                again</i>.</li>
+                            Green means subjects were added. Red explains the problem and lists a bulleted
+                            <i>Recommendation</i>.</li>
                         <li><b>Fix and refine.</b> Fix highlighted rows, then tap <i>Import fixed rows</i>. A
-                            <i>verify</i> tag means the reader was unsure: tap <i>Crop &amp; rescan</i>. Tap the
-                            <i>&times;</i> on the preview to remove the image. A new image, or a re-crop, refreshes the
-                            subjects from your previous scan; rows you added or edited yourself are kept.</li>
-                        <li><b>Edit or delete subjects.</b> In <i>Saved subjects</i>, use the pencil to change units or
-                            final grade, or the trash icon to delete (you'll be asked to confirm).</li>
+                            <i>verify</i> tag means the reader was unsure: tap <i>Crop &amp; rescan</i>. A new image, or
+                            a re-crop, refreshes the subjects from your previous scan; rows you added or edited yourself
+                            are kept.</li>
+                        <li><b>Preview and download the image.</b> Tap the <i>Preview</i> button under the image (or tap the image itself). In the preview, choose the <i>Full image</i> or the <i>Cropped image</i>, rename the file (a cropped image is named <i>cropped-image</i> by default), choose <i>PNG</i> or <i>JPEG</i>, then tap <i>Download</i>.</li>
+                        <li><b>Remove the image.</b> Tap the <i>&times;</i> on the preview and confirm. Subjects already
+                            added stay in <i>Saved subjects</i>.</li>
+                        <li><b>Edit or delete subjects.</b> In <i>Saved subjects</i>, use the pencil to change units or final grade. The trash icon
+                            deletes after you confirm.</li>
                         <li><b>Save to history.</b> Tap <i>Save to history</i> to keep the GWA and its subjects. The
-                            screen then clears for your next sheet. Tap a record in <i>History</i> to see its details.
-                        </li>
-                        <li><b>Edit a history record.</b> Tap the pencil on a record, or <i>Edit in Saved subjects</i>
-                            in its details. Its subjects load under an orange banner. Tap <i>Update record</i> to save
-                            changes or <i>Cancel</i> to discard them. Your previous list returns afterwards.</li>
-                        <li><b>Export, print or start over.</b> <i>CSV</i> and <i>Print</i> need at least one saved
-                            subject, otherwise a pop-up tells you what to do. <i>Clear history</i> and <i>Reset all
-                                data</i> ask first.</li>
+                            screen then clears for your next sheet. Tap a record in <i>History</i> for details, or its
+                            pencil to edit it under an orange banner (<i>Update record</i> or <i>Cancel</i>).</li>
+                        <li><b>Export, print or start over.</b> <i>CSV</i> opens a pop-up where you rename the file, choose summary computations and spreadsheet formulas, and confirm before it downloads. <i>CSV</i> and <i>Print</i> need at
+                            least one saved subject. <i>Clear history</i> and <i>Reset all data</i> ask first.</li>
                     </ol>
                 </div>
             </template>
@@ -243,7 +241,8 @@
                         <li>Every error appears as a pop-up with a recommendation, and scans are verified against the
                             sample sheet in a loading pop-up.</li>
                         <li>Edit or delete saved subjects at any time.</li>
-                        <li>Save results to history, edit a record later, export CSV, or print.</li>
+                        <li>Save results to history, edit a record later, export CSV with summary computations, or
+                            print.</li>
                         <li>Your data is stored only on this device, in your browser.</li>
                     </ul>
                 </div>
@@ -293,7 +292,7 @@
                 <div class="av" aria-hidden="true">EJ</div>
                 <div><b>El Jay</b><span class="mu">Developer</span></div>
             </div>
-            <p class="copy mu">© 2026 GWA Calculator</p>
+            <p class="copy mu">© 2026 GWA Calculator · build 8</p>
         </footer>
     </main>
     <div id="mo" class="mo hid np" role="dialog" aria-modal="true" aria-labelledby="mt">
@@ -306,6 +305,6 @@
         </div>
     </div>
     <div id="toast" class="np" role="status" aria-live="polite"></div>
-    <script src="index.js"></script>
+    <script src="index.js" defer></script>
 </body>
 </html>

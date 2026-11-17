@@ -1324,3 +1324,100 @@ button.ib {
 .scsel option {
     color: #111
 }
+
+.chkl {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin: 8px 0;
+    font-size: .9rem
+}
+
+.chkl input {
+    width: auto;
+    min-height: 0;
+    margin-top: 3px
+}
+
+#pv {
+    cursor: zoom-in
+}
+
+.pvbox {
+    display: grid;
+    place-items: center;
+    background: var(--in);
+    border-radius: 10px;
+    padding: 6px
+}
+
+.pvbox img {
+    max-width: 100%;
+    max-height: 46dvh;
+    display: block;
+    border-radius: 6px
+}
+
+footer.card,
+.tkg {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 200px
+}
+
+/* Preview & download and CSV pop-ups */
+.pvbox {
+    min-height: 120px;
+    background: repeating-conic-gradient(#e9f0ed 0% 25%, #f6faf8 0% 50%) 50%/16px 16px
+}
+
+.pvbox img {
+    max-height: 42dvh;
+    object-fit: contain;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, .18)
+}
+
+#pvm {
+    text-align: center;
+    font-size: .82rem
+}
+
+.fld select,
+.fld input[type=text] {
+    width: 100%;
+    min-width: 0
+}
+
+.fld select:disabled {
+    opacity: .6
+}
+
+.fld select:focus-visible,
+.fld input[type=text]:focus-visible {
+    outline: 2px solid var(--ac);
+    outline-offset: 1px
+}
+
+.chkl {
+    cursor: pointer
+}
+
+.chkl input {
+    accent-color: var(--ac)
+}
+
+@media (max-width:380px) {
+    .fld {
+        grid-template-columns: 1fr;
+        gap: 4px
+    }
+}
+
+/* Performance: skip layout and paint for off-screen history rows, keep pop-up scrolling contained */
+.hi {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 56px
+}
+
+.mb {
+    overscroll-behavior: contain
+}
